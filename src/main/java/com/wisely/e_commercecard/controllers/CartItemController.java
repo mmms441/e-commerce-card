@@ -10,6 +10,7 @@ import com.wisely.e_commercecard.service.user.UserService;
 import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -23,6 +24,7 @@ public class CartItemController {
     private final ICartService cartService;
     private final UserService userService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("item/add")
     public ResponseEntity<ApiResponse> addItem(
                                                @RequestParam Long productId,
@@ -40,6 +42,7 @@ public class CartItemController {
             return ResponseEntity.status(UNAUTHORIZED).body(new ApiResponse( e.getMessage() ,null));
         }
     }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("cart/{cartId}/item/{itemId}/remove")
     public ResponseEntity<ApiResponse> removeItem (@PathVariable Long cartId,@PathVariable Long itemId, Integer quantity) {
         try {
@@ -50,6 +53,7 @@ public class CartItemController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("cart/{cartId}/item/{itemId}/update")
     public ResponseEntity<ApiResponse> updateQuantity (@PathVariable Long cartId,
                                                        @PathVariable Long itemId,
@@ -61,5 +65,10 @@ public class CartItemController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse( e.getMessage() ,null));
         }
+    }
+
+    @GetMapping("/empty")
+    public ResponseEntity<ApiResponse> emptyCart() {
+        return ResponseEntity.ok(new ApiResponse("empty" ,null));
     }
 }
