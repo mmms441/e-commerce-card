@@ -4,6 +4,7 @@ import com.wisely.e_commercecard.model.Role;
 import com.wisely.e_commercecard.model.User;
 import com.wisely.e_commercecard.repository.RoleRepository;
 import com.wisely.e_commercecard.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -13,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
-
+@Transactional
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements ApplicationListener<ApplicationReadyEvent> {
@@ -24,10 +25,10 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        Set<String> defaultRoles = Set.of("ROLE_ADMIN" , "ROLE_USER");
-            //createDefaultUsersIfNotExists();
-            //createDefaultAdminsIfNotExists();
-            createDefaultRolesIfNotExists(defaultRoles);
+        Set<String> defaultRole = Set.of("ROLE_ADMIN" , "ROLE_USER");
+            createDefaultUsersIfNotExists();
+            createDefaultAdminsIfNotExists();
+            createDefaultRoleIfNotExists(defaultRole);
     }
     private void createDefaultUsersIfNotExists(){
         Role adminRole = roleRepository.findByName("ROLE_USER").get();
@@ -49,7 +50,7 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
     private void createDefaultAdminsIfNotExists(){
         Role adminrole = roleRepository.findByName("ROLE_ADMIN").get();
 
-        for(int i=0 ;i < 3; i++){
+        for(int i=0 ;i < 5; i++){
             String defaultEmail = "ADMIN"+i+"@email.com";
             if(userRepository.existsByEmail(defaultEmail)) {
                 continue;}
@@ -65,7 +66,7 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
         }
     }
 
-    public void createDefaultRolesIfNotExists(Set<String> roles){
+    public void createDefaultRoleIfNotExists(Set<String> roles){
         roles.stream()
                 .filter(role->roleRepository.findByName(role).isEmpty())
                 .map(Role::new)

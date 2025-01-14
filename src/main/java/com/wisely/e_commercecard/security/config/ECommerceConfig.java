@@ -11,25 +11,28 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
 
 import java.util.List;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 public class ECommerceConfig {
-    private final ShopUserDetailsService shopUserDetailsService;
+    private final UserDetailsService userDetailsService;
     private final JwtAuthEntryPoint authEntryPoint;
-    private static final List<String> SECURED_URLS = List.of("/api/v1/cartItem/**" , "/api/v1/carts/**");
+    private static final List<String> SECURED_URLS = List.of("/api/v1/cartItem/empty");
+    //private static final List<String> SECURED_URLS = List.of("/api/v1/cartItem/**" , "/api/v1/carts/**");
     @Bean
     public  ModelMapper modelMapper(){
         return new ModelMapper();
@@ -54,12 +57,12 @@ public class ECommerceConfig {
     @Bean
     public DaoAuthenticationProvider authProvider(){
         var authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(shopUserDetailsService);
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider daoAuthenticationProvider) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
